@@ -43,14 +43,15 @@ def gen_captcha_text_and_image(iter):
 	 
 if __name__ == '__main__':
 
-        
-        for i in range(20):     
+        #generates 20 samples
+        for i in range(20): #change 20 to 20 000     
                 text, image = gen_captcha_text_and_image(i)
-                f = plt.figure()
-                f.canvas.set_window_title(text+'.png')
-                f.suptitle(text+'.png')
-                ax = f.add_subplot(111)
-                ax.text(0.1, 0.9,text, ha='center', va='center', transform=ax.transAxes)
-                plt.imshow(image)
-                plt.show()
+                #view image
+                #f = plt.figure()
+                #f.canvas.set_window_title(text+'.png')
+                #f.suptitle(text+'.png')
+                #ax = f.add_subplot(111)
+                #ax.text(0.1, 0.9,text, ha='center', va='center', transform=ax.transAxes)
+                #plt.imshow(image)
+                #plt.show()
       
