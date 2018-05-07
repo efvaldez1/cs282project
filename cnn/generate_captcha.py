@@ -6,9 +6,24 @@ import random
 import os
 import captcha_params
 import string 
+import collections 
+import plotly.plotly as py
+#ordered dict
+#0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 
-#string.ascii_letters are abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 
+character_set = captcha_params.get_char_set()
+#d={}
+character_count = collections.OrderedDict()
+print(" Char Set: ",character_set)
+for c in character_set:
+	character_count[c]=0
+#0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+#counts the occurences of all characters (in order)
+print("Char Count: ",character_count)
+def count_char(captcha):
+	for char in captcha:
+		character_count[char]+=1
 def random_text(characters=captcha_params.get_char_set(),captcha_size= captcha_params.get_captcha_size()):
 		captcha_text = []
 		for i in range(captcha_size):
@@ -16,7 +31,7 @@ def random_text(characters=captcha_params.get_char_set(),captcha_size= captcha_p
 			captcha_text.append(str(char))
 
 		captchaTextNoSpace = ''.join(captcha_text)
-				
+		count_char(captchaTextNoSpace)
 		print('no space')
 		print(captchaTextNoSpace)
 		return captchaTextNoSpace
@@ -26,7 +41,8 @@ def gen_captcha_text_and_image(iter):
 
 	image=ImageCaptcha(width=captcha_params.get_width(), height = captcha_params.get_height(), font_sizes=[30])
 	#print(image)
-	captcha_text = random_text()
+	#captcha_text = random_text()
+	captcha_text = "oO"+random_text() #proof that "o" and "O" looks the same
 	path = '../images/' #go up one directory then create images folder
 
 	if os.path.exists(path) == False: # if the folder is not existed, create it
@@ -54,4 +70,4 @@ if __name__ == '__main__':
                 #ax.text(0.1, 0.9,text, ha='center', va='center', transform=ax.transAxes)
                 #plt.imshow(image)
                 #plt.show()
-      
+        print("character stats: ",character_count)
