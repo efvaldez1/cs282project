@@ -523,10 +523,32 @@ The k-nearest neighbor classifier \cite{altman92} is an instance-based learning 
 \[ Y_t = \text{mode}(Y_{(1)},Y_{(2)},...,Y_{(k)})\]
 where $Y_{(i)}$ is the class of the order statistic $X_{(i)}$ and $k$ is a user-defined, preferably odd positive integer that indicates the number of nearest neighbors to be considered for classification. In case of ties in classification, $k$ is decremented by 1 until the tie is resolved. For example, if applying the k-NN algorithm on an observation with $k = 5$ results into labels $(1,2,1,2,4)$, $k$ will be reduced to 3 to break the tie and the observation will be given the label 1. 
 \subsubsection{Support Vector Machines}
-A support vector machine \cite{cortes95} is a classifier that identifies the hyperplane that separates two sets of data with the highest margin of separation. More formally, [DISCUSS FORMULA HERE; ALSO, BRIEFLY STATE HARD/SOFT MARGIN and KERNEL TRICKS]
-\subsubsection{Random Forest}
+A support vector machine (SVM) \cite{cortes95} is a linear classifier that identifies how to separates two sets of data with the highest margin of separation. More formally, given training data $(x_1, y_1) ,...,(x_n, y_n)$ where $y_i$ is the corresponding class label (1 or -1) of the data point $x_1$, an SVM solves for a hyperplane that maximizes the distance between that hyperplane and the nearest points from both classes. The hyperplane is of the form $w \cdot x - b = 0$, where $w$ is the normal vector to the hyperplane. The distance to be maximized is the distance between two hyperplanes $w \cdot x - b = 1$ and $w \cdot x - b = -1$ such that data from class 1 is on or above the first hyperplane and data from class -1 is on or below the second hyperplane; that distance is twice the norm of the normal vector $w$. The data points on the parallel hyperplanes are the support vectors for those hyperplanes. Upon identifying the optimal separating hyperplane and its corresponding support vectors, the label $\hat{y}$ for an unclassified data point $\hat{x}$ can be solved by $\hat{y}= \text{sgn}(w \cdot \hat{x} - b)$.\\
+\begin{figure}[h]
+        \begin{subfigure}{0.16\textwidth}
+                \includegraphics[width=\textwidth]{svm.png}
+	     \caption{Linear SVM}
+	     \label{fig:lsvm}
+        \end{subfigure}
+        \begin{subfigure}{0.32\textwidth}
+                \includegraphics[width=\textwidth]{ktrick.png}
+	     \caption{Mapping to high-dimensional space}
+	     \label{fig:ktrick}
+        \end{subfigure}
+	\caption{Visualization of an SVM classifier}
+	\label{fig:svm}
+\end{figure}
 
-\subsubsection{Deep Learnin}
+To make the SVM classifier nonlinear, a method known as the kernel trick \cite{boser92} is used. This trick involves the mapping of data to a higher-dimensional feature space before finding the separating hyperplane. An example of such mapping is shown in \hyperref[fig:ktrick]{\autoref{fig:ktrick}}, wherein each data point $(a,b)$ is mapped to a 3-dimensional space using the mapping function $\varphi((a,b)) = (a,b,a^2 + b^2)$; it can be seen that the hyperplane is easier to identify in the new 3D space. The label for $\hat{x}$ is then solved by $\hat{y}= \text{sgn}(w \cdot \varphi(\hat{x}) - b)$.\\
+\indent Computation of the mappings of the points can be avoided altogether by using a function called a kernel. The kernel $K(x,\hat{x})$ returns a similarity measure between support vector $x$ and unclassified data point $\hat{x}$ with respect to a higher-dimensional space, which is then used to compute for the label of $\hat{x}$:
+\[ \hat{y}= \text{sgn}\left(\sum_{i=1}^{n}{w_iy_iK(x_i,\hat{x}})\right) \]
+where $n$ is the number of support vectors. Examples of commonly used kernel functions are the polynomial kernel $K(x,\hat{x}) = (x \cdot \hat{x})^d$ and the radial basis function (RBF) or Gaussian kernel $K(x,\hat{x}) = \text{exp}(-\gamma \lvert\lvert x - \hat{x} \rvert\rvert^2) $\cite{chang10} where $\gamma = \frac{1}{2\sigma^2}$.
+
+\subsubsection{Random Forest}
+A random forest classifier \cite{breiman01} is an ensemble learning algorithm that constructs multiple decision trees using a randomly selected subset from the training data for each decision tree and identifies the class label of an input based on the output of the majority of the decision trees. This classifier is known to be highly resistant to overfitting due to its attempt to reduce the sensitivity of the mode to noise by constructing uncorrelated decision trees. Given training data and their corresponding class labels, a random forest classifier first performs what is called bootstrap aggregation or bagging; this step selects random subsets from the training data is uniformly selected with replacement. During bagging, the features of the data can also be "bagged" (i.e. different features can be selected for each sampling) to further decorrelate the trees.  For each random subset, a decision tree is constructed. To identify the class label of an unclassified data point, the classifier returns the mode of the output labels of all decision trees.\\
+\indent Decision trees are individually constructed using a top-down splitting of the sampled training data based on some feature that yields the highest information gain. Information gain is defined as the difference between the uncertainty value in the parent decision node and the weighted sum of uncertainty values in the child decision nodes. Examples of metrics that compute the uncertainty values of each node are Gini impurity and information entropy \cite{breiman17}.
+
+\subsubsection{Deep Learning}
 % An example of a double column floating figure using two subfigures.
 % (The subfig.sty package must be loaded for this to work.)
 % The subfigure \label commands are set within each subfloat command,
@@ -594,10 +616,14 @@ A support vector machine \cite{cortes95} is a classifier that identifies the hyp
 % footnotes above bottom floats. This can be corrected via the
 % \fnbelowfloat command of the stfloats package.
 \section{Methodology}
-[OTSU, OPENING, KMEANS, CLASSIFIER]
-\subsection{Preprocessing}
-\subsection{Segmentation and Post-processing}
-\subsection{Recognition}
+\subsection{Procedure for the Machine Learning Algorithms}
+\subsubsection{Preprocessing}
+Each image is converted into grayscale, then into binary using a thresholding method called the Otsu's method \cite{otsu79}, which searches for the threshold value $t$ that minimizes the intra-class variance within both classes. The overall intra-class variance for the grayscale intensities on each image is defined as
+\[ \sigma^2_w(t) =  \sigma^2_0(t)\sum_{i=0}^{t-1}{p_i} +  \sigma^2_1(t)\sum_{i=t}^{255}{p_i} \]
+where $\sigma^2_0(t)$ and $\sigma^2_1(t)$ are the intra-class variances of the class 0 (black) and class (1) pixels, respectively, and the summations are the corresponding probabilities of a pixel to have an intensity within the range dictated by the limits of the summations. According to Otsu, minimizing the overall intra-class variance also minimizes the inter-class variance.
+\subsubsection{Segmentation and Post-processing}
+\subsubsection{Recognition}
+\subsection{Procedure for the Deep Learning Algorithm}
 \section{Results and Discussion}
 \subsection{Experiment specifications}
 \subsection{Experiment results}
